@@ -6,6 +6,12 @@ BUILD_DIR="$(pwd)"
 EXECUTABLE="$BUILD_DIR/webhookly"
 CONFIG_FILE="/etc/webhookly/config.yaml"
 
+CONFIG_DIR="/etc/webhookly"
+
+if [ ! -d "$CONFIG_DIR" ]; then
+  mkdir -p "$CONFIG_DIR"
+fi
+
 if [ ! -f "$CONFIG_FILE" ]; then
   echo "secret: 1234
 cert: /etc/ssl/star.pem
