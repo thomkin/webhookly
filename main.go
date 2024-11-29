@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
 	"log"
@@ -83,12 +84,19 @@ func handlerExecution(ref string, handlers Handlers, repoName string) {
 	}
 
 	cmd := exec.Command(handler.Path)
-	output, err := cmd.CombinedOutput()
+	cmdReader, err := cmd.StdoutPipe()
 	if err != nil {
-		fmt.Println(err)
+		fmt.Fprintln(os.Stderr, "Error creating StdoutPipe for Cmd", err)
 	}
-
-	//TODO: we can make this log a little nicer at some point
-	fmt.Printf("%s", output)
+	scanner := bufio.NewScanner(cmdReader)
+	go func() {
+		for scanner.Scan() {
+			fmt.Printf("%s\n", scanner.Text())
+		}
+	}()
+	err = cmd.Start()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "Error starting Cmd", err)
+	}
 
 }
