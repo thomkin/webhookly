@@ -27,15 +27,8 @@ func main() {
 		Handlers Handlers `yaml:"handlers"`
 	}
 
-	systemd := flag.Bool("systemd", false, "Create a systemd service file and activate it")
-
 	configFile := flag.String("c", "config.yaml", "path to config file")
 	flag.Parse()
-
-	if *systemd {
-		installSystemd()
-		os.Exit(0)
-	}
 
 	data, err := os.ReadFile(*configFile)
 	if err != nil {
@@ -94,38 +87,5 @@ func handlerExecution(ref string, handlers Handlers) {
 
 	//TODO: we can make this log a little nicer at some point
 	fmt.Printf("%s", output)
-
-}
-
-func installSystemd() {
-	serviceFile := "/etc/systemd/system/webhookly.service"
-	if _, err := os.Stat(serviceFile); os.IsNotExist(err) {
-		f, err := os.Create(serviceFile)
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer f.Close()
-
-		_, err = f.WriteString("[Unit]\nDescription=Webhookly\nAfter=network.target\n\n[Service]\nUser=webhookly\nExecStart=/usr/local/bin/webhookly" + "\nRestart=always\nRestartSec=10\n\n[Install]\nWantedBy=multi-user.target")
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		cmd := exec.Command("systemctl", "enable", "webhookly")
-		output, err := cmd.CombinedOutput()
-		if err != nil {
-			fmt.Println(err)
-		}
-
-		fmt.Printf("%s", output)
-
-		cmd = exec.Command("systemctl", "start", "webhookly")
-		output, err = cmd.CombinedOutput()
-		if err != nil {
-			fmt.Println(err)
-		}
-
-		fmt.Printf("%s", output)
-	}
 
 }
