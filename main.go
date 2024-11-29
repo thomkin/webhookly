@@ -15,8 +15,12 @@ import (
 type Handler struct {
 	Path string `yaml:"path"`
 }
+type Handlers map[string]map[string]Handler
 
-type Handlers map[string]Handler
+type Slack struct {
+	Token     string `yaml:"token"`
+	ChannelId string `ỳaml:"channelId"`
+}
 
 func main() {
 	var config struct {
@@ -25,6 +29,7 @@ func main() {
 		Key      string   `yaml:"key"`
 		Port     string   `yaml:"port"`
 		Handlers Handlers `yaml:"handlers"`
+		Slack    Slack    `yaml:""slack`
 	}
 
 	configFile := flag.String("c", "config.yaml", "path to config file")
@@ -55,21 +60,19 @@ func main() {
 		case github.PushPayload:
 			push := payload.(github.PushPayload)
 			ref := push.Ref
-			handlerExecution(ref, config.Handlers)
-
-			// case github.PullRequestPayload:
-			// 	pullRequest := payload.(github.PullRequestPayload)
-			// 	ref := pullRequest.
-			// 	handlerExecution(ref, config.Handlers)
-
+			repoName := push.Repository.Name
+			handlerExecution(ref, config.Handlers, repoName)
 		}
 	})
 
-	http.ListenAndServeTLS(":"+config.Port, config.Cert, config.Key, nil)
+	err = http.ListenAndServeTLS(":"+config.Port, config.Cert, config.Key, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
-func handlerExecution(ref string, handlers Handlers) {
-	handler, ok := handlers[ref]
+func handlerExecution(ref string, handlers Handlers, repoName string) {
+	handler, ok := handlers[repoName][ref]
 	if !ok {
 		println("Handler not found for ref: " + ref)
 		return

@@ -31,8 +31,7 @@ Description=Webhookly
 After=network.target
 
 [Service]
-User=root
-ExecStart=$EXECUTABLE -config $CONFIG_FILE
+ExecStart=$EXECUTABLE -c $CONFIG_FILE
 Restart=always
 RestartSec=10
 
