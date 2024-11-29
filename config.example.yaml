@@ -1,0 +1,6 @@
+secret: 1234
+cert: /etc/ssl/star.pem
+key: /etc/ssl/star.key
+handlers:
+  refs/heads/main:
+    path: /tmp/execute.me.sh
