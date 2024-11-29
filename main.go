@@ -28,13 +28,14 @@ func main() {
 	}
 
 	systemd := flag.Bool("systemd", false, "Create a systemd service file and activate it")
+
+	configFile := flag.String("c", "config.yaml", "path to config file")
+	flag.Parse()
+
 	if *systemd {
 		installSystemd()
 		os.Exit(0)
 	}
-
-	configFile := flag.String("c", "config.yaml", "path to config file")
-	flag.Parse()
 
 	data, err := os.ReadFile(*configFile)
 	if err != nil {
